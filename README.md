@@ -1,2 +1,3 @@
 # Projects
-Learning from Codecademy
+A place for storing smaller projects, that don't require a whole repo for them
+

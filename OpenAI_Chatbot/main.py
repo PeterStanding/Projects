@@ -1,9 +1,11 @@
 from openai import OpenAI
 
 client = OpenAI()
+conversation = []
 
+prompt = "Can you tell me a fact about London?"
 # Create a chat request
-def send_message(message):
+def send_message(message, user_message):
     '''
     n                   = Number of Responses Wanted
     max_tokens          = Sets hard limit on number of tokens that can be created
@@ -18,30 +20,32 @@ def send_message(message):
                             --> Lower the value, allows for more repetition
                             --> 0.3
     '''
+    conversation.append({"role": "user", "content": user_message})
+
     response = client.chat.completions.create(
         model = "gpt-4",
-        messages = [{"role":"user", "content":prompt}],
+        messages = [{"role":"user", "content":message}],
         # Total number of responses
         n = 3
     )
-
-    return response.choices[0].message.content.strip()
+    
+    reply = response.choices[0].message.content.strip()
+    conversation.append({"role": "assistant", "content": reply})
+    
+    return reply
 
 # Iterate over the Conversation History
-def conversation_history(convo):
+def print_conversation_history(convo):
     for msg in convo:
         print("Role : ", msg['role'], " --> ", msg['content'])
-conversation = [
-    {"role": "user", "content": "What's the capital of France?"}
-]
 
 # Get first response
-reply = send_message(conversation)
+reply = send_message(conversation, prompt)
 print("Assistant:", reply)
 
-# Append the Response to the History
-conversation.append({"role": "assistant", "content": reply})
-conversation.append({"role": "user", "content" : "Is it a large City?"})
+# Add a follow-up question
+prompt2 = "How long is the Thames?"
 
-follow_up = send_message(conversation)
-print("Assistant: ", follow_up)
+# Get response with conversation context
+follow_up_reply = send_message(conversation, prompt2)
+print("Assistant follow-up:", follow_up_reply)

@@ -49,3 +49,12 @@ prompt2 = "How long is the Thames?"
 # Get response with conversation context
 follow_up_reply = send_message(conversation, prompt2)
 print("Assistant follow-up:", follow_up_reply)
+
+'''
+conversation = [
+    # System message defines the AI's behavior and tone
+    {"role": "system", "content": system_prompt},
+    # User message contains the actual question
+    {"role": "user", "content": "What's a popular type of pizza?"},
+]
+'''

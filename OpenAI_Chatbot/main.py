@@ -1,55 +1,50 @@
 from openai import OpenAI
+import uuid
 
 client = OpenAI()
 conversation = []
+chat_sessions = {}
+
+# Define a common system prompt for all conversations
+system_prompt = {
+    "role": "system",
+    "content": "You are a friendly and efficient customer service attendant eager to assist customers with their inquiries and concerns."
+}
 
 prompt = "Can you tell me a fact about London?"
 # Create a chat request
-def send_message(message, user_message):
-    '''
-    n                   = Number of Responses Wanted
-    max_tokens          = Sets hard limit on number of tokens that can be created
-                            --> 100
-    temperature         = Controls Randomness 
-                            --> Lower the value, more predictable
-                            --> 0.7
-    presence_penalty    = Penalizing AI for using words that have already appeared in the conversation
-                            --> Lower the value, AI less discouraged from repeating words
-                            --> 0.6
-    frequency_penalty   = Helps Reduce repetition in the responses 
-                            --> Lower the value, allows for more repetition
-                            --> 0.3
-    '''
-    conversation.append({"role": "user", "content": user_message})
-
+def send_message(chat_id, user_message):
+    if chat_id not in chat_sessions:
+        raise ValueError("Chat Sessions not found")
+    
+    chat_sessions[chat_id].append({"role": "user", "content": user_message})
     response = client.chat.completions.create(
-        model = "gpt-4",
-        messages = [{"role":"user", "content":message}],
-        # Total number of responses
-        n = 3
+        model="gpt-4",
+        messages = chat_sessions[chat_id]
     )
     
-    reply = response.choices[0].message.content.strip()
-    conversation.append({"role": "assistant", "content": reply})
-    
-    return reply
-
+    answer = response.choices[0].message.content.strip()
+    chat_sessions[chat_id].append({"role": "assistant", "content": answer})
+    return answer
+# Create a new Chat Session with a Unique Identifier
+def create_Chat():
+    chat_id = str(uuid.uuid4())  # Create unique session identifier
+    chat_sessions[chat_id] = []  # Initialize empty conversation history
+    chat_sessions[chat_id].append(system_prompt)  # Add system prompt to conversation history
+    return chat_id
 # Iterate over the Conversation History
 def print_conversation_history(convo):
     for msg in convo:
         print("Role : ", msg['role'], " --> ", msg['content'])
 
-# Get first response
-reply = send_message(conversation, prompt)
-print("Assistant:", reply)
+chat_id = create_Chat()
 
-# Add a follow-up question
-prompt2 = "How long is the Thames?"
+print("Response:", send_message(chat_id, "I'm having trouble with my recent order. Can you help me track it?"))
 
-# Get response with conversation context
-follow_up_reply = send_message(conversation, prompt2)
-print("Assistant follow-up:", follow_up_reply)
-
+# Print the entire conversation history for the chat session
+print("\nConversation History:")
+for message in chat_sessions[chat_id]:
+    print(f"- {message['role'].capitalize()}: {message['content']}")
 '''
 conversation = [
     # System message defines the AI's behavior and tone

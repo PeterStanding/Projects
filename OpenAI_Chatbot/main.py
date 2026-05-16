@@ -5,12 +5,6 @@ client = OpenAI()
 conversation = []
 chat_sessions = {}
 
-# Define a common system prompt for all conversations
-system_prompt = {
-    "role": "system",
-    "content": "You are a friendly and efficient customer service attendant eager to assist customers with their inquiries and concerns."
-}
-
 prompt = "Can you tell me a fact about London?"
 # Create a chat request
 def send_message(chat_id, user_message):
@@ -36,6 +30,21 @@ def create_Chat():
 def print_conversation_history(convo):
     for msg in convo:
         print("Role : ", msg['role'], " --> ", msg['content'])
+# Read file for the System Prompt
+def load_system_prompt(file_path: str) -> str:
+    try:
+        with open(file_path, 'r') as f:
+            return f.read()
+    except Exception as e:
+        print(f"Error loading system prompt: {e}")
+        return "You are a helpful Assistant"
+
+system_prompt = load_system_prompt('system_prompt.txt')
+# Define a common system prompt for all conversations
+system_prompt = {
+    "role": "system",
+    "content": "You are a friendly and efficient customer service attendant eager to assist customers with their inquiries and concerns."
+}
 
 chat_id = create_Chat()
 

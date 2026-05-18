@@ -1,5 +1,6 @@
 from openai import OpenAI
 import uuid
+from chat import ChatManager
 
 client = OpenAI()
 conversation = []
@@ -47,6 +48,7 @@ system_prompt = {
 }
 
 chat_id = create_Chat()
+manager = ChatManager()
 
 print("Response:", send_message(chat_id, "I'm having trouble with my recent order. Can you help me track it?"))
 

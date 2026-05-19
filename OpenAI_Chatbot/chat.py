@@ -26,3 +26,33 @@ class ChatManager:
             system_message = {"role":"system", "content":chat['system_prompt']}
             return [system_message] + chat['messages']
         return []
+
+    def process_message(self, user_id: str, chat_id: str, message: str) -> str:
+        # Step 1: Retrieve the chat
+        chat = self.chat_manager.get_chat(user_id, chat_id)
+        if not chat:
+            raise ValueError("Chat not found")
+        
+        # Step 2: Add user message to chat history
+        self.chat_manager.add_message(user_id, chat_id, "user", message)
+        
+        try:
+            # Step 3: Get AI response
+            conversation = self.chat_manager.get_conversation(user_id, chat_id)
+            
+            response = self.openai_client.chat.completions.create(
+                model="gpt-4",
+                messages=conversation,
+                temperature=0.7,
+                max_tokens=500
+            )
+            
+            ai_message = response.choices[0].message.content
+            
+            # Step 4: Add AI response to chat history
+            self.chat_manager.add_message(user_id, chat_id, "assistant", ai_message)
+            
+            return ai_message    
+        except Exception as e:
+            # Step 5: Handle errors
+            raise RuntimeError(f"Error getting AI response: {str(e)}")

@@ -1,6 +1,6 @@
 from openai import OpenAI
 import uuid
-from chat import ChatManager
+from OpenAI_Chatbot.chat_service import ChatManager
 
 client = OpenAI()
 conversation = []

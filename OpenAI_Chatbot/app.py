@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, render_template
 from OpenAI_Chatbot.chat_controller import ChatController
 
 app = Flask(__name__)
@@ -10,7 +10,7 @@ ChatController = ChatController()
 @app.route('/')
 def index():
     ChatController.ensure_user_session()
-    return "Welcome to the Chatbot Service"
+    return render_template('index.html')
 # Define a route for creating a new chat session
 @app.route('/api/create_chat', methods = ['POST'])
 def create_chat():

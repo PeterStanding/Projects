@@ -11,6 +11,11 @@
         <h1>Welcome to Our Customer Service</h1>
         <p>How can we help you today?</p>
     </div>
+    <div class="suggestions">
+        <button class="suggestion-btn" onclick="usePrompt('Can you tell me your business hours?')">Business Hours</button>
+        <button class="suggestion-btn" onclick="usePrompt('What services do you offer?')">Our Services</button>
+        <button class="suggestion-btn" onclick="usePrompt('What is your contact email?')">Contact Email</button>
+    </div>
     <div id="chat-container">
         <div id="messages"></div>
         <div class="input-container">
@@ -26,47 +31,64 @@
         // Get references to the messages container and message input field
         const messagesContainer = document.getElementById('messages');
         const messageInput = document.getElementById('message-input');
+        let currentChatId = null;
+        let currentUserId = null;
 
-        // TODO: Add an event listener for 'DOMContentLoaded' that calls startNewChat
+        document.addEventListener('DOMContentLoaded', startNewChat);
 
-        // TODO: Define the startNewChat function that clears the chat history
-
+        function startNewChat() {
+            fetch('/api/create_chat', {
+                method: 'POST'
+            })
+                .then(response => response.json())
+                .then(data => {
+                    currentChatId = data.chat_id;
+                    currentUserId = data.user_id;
+                    messagesContainer.innerHTML = '';
+                })
+                .catch(() => {
+                    alert('Error creating chat');
+                });
+        }
         function appendMessage(role, content) {
-            // Create a new div element for the message
             const messageDiv = document.createElement('div');
-
-            // Assign a class to the message based on its role (user or assistant)
             messageDiv.className = `message ${role}`;
-
-            // Set the text content of the message
             messageDiv.textContent = content;
-
-            // Append the message to the messages container
             messagesContainer.appendChild(messageDiv);
-
-            // Scroll the messages container to the bottom to show the latest message
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
         }
-
         function sendMessage() {
-            // Retrieve and trim the input value
             const message = messageInput.value.trim();
-
-            // If the message is empty, do not proceed
             if (!message) return;
 
-            // Add user message to display
+            // Add user message
             appendMessage('user', message);
-
-            // Clear the input field after sending the message
             messageInput.value = '';
 
-            // For now, just echo the message back
-            setTimeout(() => {
-                appendMessage('assistant', `You said: ${message}`);
-            }, 500);
+            // Send to server
+            fetch('/api/send_message', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    user_id: currentUserId,
+                    chat_id: currentChatId,
+                    message: message
+                })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    appendMessage('assistant', data.message);
+                })
+                .catch(() => {
+                    alert('Error sending message');
+                });
         }
-
+        function usePrompt(prompt) {
+            messageInput.value = prompt;
+            sendMessage();
+        }
         // Handle Enter key
         messageInput.addEventListener('keypress', function (e) {
             if (e.key === 'Enter' && !e.shiftKey) {

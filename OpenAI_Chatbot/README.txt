@@ -3,3 +3,8 @@
 Following my way through the CodeSignal Project for Using OpenAI to create a chatbot
 
 All the code is run within the webpages terminal, therefore not private keys have been shared
+
+
+GitHub Repo for the Course:
+
+https://github.com/CodeSignal-Learn/course_building-a-chatbot-with-flask-and-openai/tree/main
